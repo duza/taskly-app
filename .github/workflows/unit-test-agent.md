@@ -23,7 +23,11 @@ permissions:
   contents: read
   pull-requests: read
 
-engine: gemini
+# Pinned model: the 'auto' alias routes to the newest Flash model, which returned 503
+# (high demand) on the free tier in every attempt. A pinned, slightly older Flash is stable.
+engine:
+  id: gemini
+  model: gemini-3.7-flash
 timeout-minutes: 30
 
 imports:
