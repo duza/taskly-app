@@ -29,6 +29,12 @@ engine:
   model: claude-sonnet-5-5
 max-turns: 60
 timeout-minutes: 30
+# PR runs: one per PR, a new push cancels the outdated run. Manual (backfill) dispatches: one group per
+# run, so a second dispatch no longer cancels the first.
+concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
+  cancel-in-progress: true
+  job-discriminator: ${{ github.run_id }}
 
 imports:
   - .github/agents/unit-test-agent.agent.md
