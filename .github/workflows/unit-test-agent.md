@@ -23,7 +23,7 @@ permissions:
   contents: read
   pull-requests: read
 
-engine: copilot
+engine: gemini
 timeout-minutes: 30
 
 imports:
@@ -69,6 +69,26 @@ safe-outputs:
     draft: true
   add-comment:
     max: 1
+  # gh-aw's AI threat detection does not support the Gemini engine, so detection uses a
+  # deterministic gate instead: the safe-output (write) job only runs if this passes.
+  threat-detection:
+    engine: false
+    steps:
+      - name: "Gate: agent patches may only touch unit-test files"
+        run: |
+          shopt -s nullglob
+          patches=(/tmp/gh-aw/aw-*.patch)
+          if [ ${#patches[@]} -eq 0 ]; then echo "No code patch produced."; exit 0; fi
+          changed=$(grep -hE '^diff --git ' "${patches[@]}" | awk '{print $4}' | sed 's#^b/##' | sort -u)
+          echo "Files changed by the agent:"; echo "$changed"
+          bad=$(echo "$changed" | grep -vE '^(backend/tests/[A-Za-z0-9_/]+\.py|frontend/src/[A-Za-z0-9_./-]+\.test\.tsx?)$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Agent patch modifies files outside the unit-test allow-list:"; echo "$bad"; exit 1
+          fi
+          if grep -hE '^\+.*(\.only\(|\.skip\(|pytest\.mark\.(skip|xfail))' "${patches[@]}"; then
+            echo "::error::Agent patch adds skipped/focused tests"; exit 1
+          fi
+          echo "Gate passed: test files only, no skip/only markers."
 
 steps:
   - name: Set up Python
