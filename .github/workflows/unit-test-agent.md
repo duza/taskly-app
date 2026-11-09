@@ -23,11 +23,11 @@ permissions:
   contents: read
   pull-requests: read
 
-# Pinned model: the 'auto' alias routes to the newest Flash model, which returned 503
-# (high demand) on the free tier in every attempt. A pinned, slightly older Flash is stable.
+# Claude via the Anthropic API (secret ANTHROPIC_API_KEY). Pinned model + turn cap bound cost.
 engine:
-  id: gemini
-  model: gemini-3.7-flash
+  id: claude
+  model: claude-sonnet-5-5
+max-turns: 60
 timeout-minutes: 30
 
 imports:
@@ -73,10 +73,9 @@ safe-outputs:
     draft: true
   add-comment:
     max: 1
-  # gh-aw's AI threat detection does not support the Gemini engine, so detection uses a
-  # deterministic gate instead: the safe-output (write) job only runs if this passes.
+  # Two layers before anything is written: gh-aw's AI threat detection (prompt injection,
+  # secret leaks, malicious patches) plus a deterministic gate. safe_outputs runs only if both pass.
   threat-detection:
-    engine: false
     steps:
       - name: "Gate: agent patches may only touch unit-test files"
         run: |
