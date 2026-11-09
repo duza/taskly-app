@@ -42,6 +42,7 @@ network:
 tools:
   edit:
   bash:
+    - "cd:*"
     - "git diff:*"
     - "git status:*"
     - "git log:*"
@@ -179,6 +180,18 @@ Read the relevant `SKILL.md` before each step and use its scripts:
 | Frontend tests | `.github/skills/write-frontend-tests/SKILL.md` |
 | Verify | `.github/skills/run-and-verify-tests/SKILL.md` |
 | Report | `.github/skills/report-results/SKILL.md` |
+
+## Shell rules (the shell is allow-listed; anything else is denied)
+
+- Run **one command per shell call**, from the repository root. No `;`, `&&`, `|` chains or heredocs:
+  a chain is denied as a whole if any part is not on the allow-list.
+- Read files with the Read/Grep/Glob tools and create or change test files with Write/Edit, not `cat` or `echo`.
+- Allowed commands include: `bash .github/skills/run-and-verify-tests/scripts/verify.sh ...`,
+  `python3 .github/skills/.../*.py ...`, `backend/.venv/bin/python -m pytest backend/tests/...`,
+  `npx vitest run ...`, `npx prettier --write ...`, `npm run typecheck`, `git diff/status/log/show ...`.
+  Run frontend `npx`/`npm` commands with `cd frontend` as a separate call first if needed.
+- If a command is denied, rephrase it as a single allowed command. Do not conclude that the shell is
+  unavailable after one denial; use `report_incomplete` only if the allowed commands really cannot do the job.
 
 ## Steps
 
