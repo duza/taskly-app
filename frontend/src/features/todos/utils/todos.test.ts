@@ -24,6 +24,28 @@ describe('selectTodos', () => {
     expect(selectTodos(todos, 'active', ' api ', 'newest')).toEqual([matching])
   })
 
+  it('filters by priority and treats "all" as no priority filter', () => {
+    const high: Todo = { ...base, id: 2, priority: 'high' }
+    const low: Todo = { ...base, id: 3, priority: 'low' }
+    const todos = [base, high, low]
+    expect(selectTodos(todos, 'all', '', 'newest', 'high')).toEqual([high])
+    expect(selectTodos(todos, 'all', '', 'newest', 'all')).toHaveLength(3)
+    expect(selectTodos(todos, 'all', '', 'newest')).toHaveLength(3)
+  })
+
+  it('combines priority with status and search', () => {
+    const match: Todo = { ...base, id: 2, priority: 'high', title: 'Fix bug' }
+    const todos: Todo[] = [
+      match,
+      { ...match, id: 3, completed: true },
+      { ...match, id: 4, priority: 'low' },
+      { ...match, id: 5, title: 'Other' },
+    ]
+    expect(selectTodos(todos, 'active', 'bug', 'newest', 'high')).toEqual([
+      match,
+    ])
+  })
+
   it('sorts by priority without changing the source array', () => {
     const high: Todo = { ...base, id: 2, priority: 'high' }
     const todos = [base, high]

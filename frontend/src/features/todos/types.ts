@@ -12,4 +12,5 @@ export interface Todo extends TodoInput {
   updated_at: string
 }
 export type Filter = 'all' | 'active' | 'completed'
+export type PriorityFilter = 'all' | Priority
 export type Sort = 'newest' | 'priority' | 'due'
