@@ -29,6 +29,12 @@ engine:
   model: claude-sonnet-5-5
 max-turns: 60
 timeout-minutes: 30
+# PR runs: one per PR, a new push cancels the outdated run. Manual (backfill) dispatches: one group per
+# run, so a second dispatch no longer cancels the first.
+concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
+  cancel-in-progress: true
+  job-discriminator: ${{ github.run_id }}
 
 imports:
   - .github/agents/unit-test-agent.agent.md
@@ -118,6 +124,11 @@ steps:
       mkdir -p .test-agent
       SKILLS="$GITHUB_WORKSPACE/.github/skills"
       if [ "$EVENT_NAME" = "pull_request" ]; then
+        # The default checkout is shallow (depth 1): fetch full history so the PR base and HEAD
+        # share a merge base for `git diff pr-base...HEAD`.
+        if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+          git fetch --no-tags --quiet --unshallow origin
+        fi
         git fetch --no-tags --quiet origin "$BASE_REF"
         git branch --force pr-base FETCH_HEAD
         python3 "$SKILLS/analyze-pr-changes/scripts/plan_changes.py" --base pr-base
