@@ -56,9 +56,11 @@ export function TodosPage() {
           filter={filters.filter}
           search={filters.search}
           sort={filters.sort}
+          priority={filters.priority}
           onFilterChange={filters.setFilter}
           onSearchChange={filters.setSearch}
           onSortChange={filters.setSort}
+          onPriorityChange={filters.setPriority}
         />
         {error && (
           <Alert variant="warning">

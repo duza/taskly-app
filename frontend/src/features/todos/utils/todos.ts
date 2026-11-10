@@ -1,4 +1,4 @@
-import type { Filter, Sort, Todo, TodoInput } from '../types'
+import type { Filter, PriorityFilter, Sort, Todo, TodoInput } from '../types'
 
 export const priorityLabels = { low: 'Low', medium: 'Medium', high: 'High' }
 const priorityOrder = { high: 0, medium: 1, low: 2 }
@@ -28,6 +28,7 @@ export function selectTodos(
   filter: Filter,
   query: string,
   sort: Sort,
+  priority: PriorityFilter = 'all',
 ): Todo[] {
   const search = query.trim().toLocaleLowerCase('en')
   return todos
@@ -35,8 +36,10 @@ export function selectTodos(
       const statusMatches =
         filter === 'all' ||
         (filter === 'completed' ? todo.completed : !todo.completed)
+      const priorityMatches = priority === 'all' || todo.priority === priority
       return (
         statusMatches &&
+        priorityMatches &&
         `${todo.title} ${todo.description}`
           .toLocaleLowerCase('en')
           .includes(search)
