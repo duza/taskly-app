@@ -60,6 +60,22 @@ describe('useTodoFilters', () => {
     expect(ids(result.current.visible)).toEqual([2])
   })
 
+  it('filters by priority and combines it with status', () => {
+    const { result } = renderHook(() => useTodoFilters(todos))
+
+    expect(result.current.priority).toBe('all')
+
+    act(() => result.current.setPriority('high'))
+    expect(result.current.priority).toBe('high')
+    expect(ids(result.current.visible)).toEqual([2])
+
+    act(() => result.current.setFilter('active'))
+    expect(ids(result.current.visible)).toEqual([])
+
+    act(() => result.current.setPriority('all'))
+    expect(ids(result.current.visible)).toEqual([3, 1])
+  })
+
   it('sorts by priority', () => {
     const { result } = renderHook(() => useTodoFilters(todos))
 

@@ -11,20 +11,37 @@ it('displays controlled values and forwards all filter changes', async () => {
     onFilterChange: vi.fn(),
     onSearchChange: vi.fn(),
     onSortChange: vi.fn(),
+    onPriorityChange: vi.fn(),
   }
   const { rerender } = render(
-    <TodoFilters filter="all" search="" sort="newest" {...callbacks} />,
+    <TodoFilters
+      filter="all"
+      search=""
+      sort="newest"
+      priority="all"
+      {...callbacks}
+    />,
   )
+  expect(screen.getByLabelText('Priority')).toHaveValue('all')
   await user.type(screen.getByLabelText('Search tasks'), 'a')
   await user.selectOptions(screen.getByLabelText('Status'), 'completed')
+  await user.selectOptions(screen.getByLabelText('Priority'), 'high')
   await user.selectOptions(screen.getByLabelText('Sort by'), 'due')
   expect(callbacks.onSearchChange).toHaveBeenCalledWith('a')
   expect(callbacks.onFilterChange).toHaveBeenCalledWith('completed')
+  expect(callbacks.onPriorityChange).toHaveBeenCalledWith('high')
   expect(callbacks.onSortChange).toHaveBeenCalledWith('due')
   rerender(
-    <TodoFilters filter="completed" search="demo" sort="due" {...callbacks} />,
+    <TodoFilters
+      filter="completed"
+      search="demo"
+      sort="due"
+      priority="low"
+      {...callbacks}
+    />,
   )
   expect(screen.getByLabelText('Search tasks')).toHaveValue('demo')
   expect(screen.getByLabelText('Status')).toHaveValue('completed')
+  expect(screen.getByLabelText('Priority')).toHaveValue('low')
   expect(screen.getByLabelText('Sort by')).toHaveValue('due')
 })
