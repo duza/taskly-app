@@ -124,6 +124,11 @@ steps:
       mkdir -p .test-agent
       SKILLS="$GITHUB_WORKSPACE/.github/skills"
       if [ "$EVENT_NAME" = "pull_request" ]; then
+        # The default checkout is shallow (depth 1): fetch full history so the PR base and HEAD
+        # share a merge base for `git diff pr-base...HEAD`.
+        if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+          git fetch --no-tags --quiet --unshallow origin
+        fi
         git fetch --no-tags --quiet origin "$BASE_REF"
         git branch --force pr-base FETCH_HEAD
         python3 "$SKILLS/analyze-pr-changes/scripts/plan_changes.py" --base pr-base
